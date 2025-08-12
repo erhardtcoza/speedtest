@@ -1,0 +1,25 @@
+name = "custom-turn-worker"
+main = "src/index.ts"
+compatibility_date = "2023-10-30"
+
+# Environment variables - configure these for your setup
+[vars]
+REALTIME_TURN_TOKEN_TTL_SECONDS = "86400"  # 24 hours
+REALTIME_TURN_ORIGINS = "https://speedtest.vinethosting.org"  # Your speedtest frontend domain
+
+# Secrets - Set these using: wrangler secret put SECRET_NAME
+# These are configured with your Cloudflare Realtime TURN server:
+# wrangler secret put REALTIME_TURN_TOKEN_ID
+# wrangler secret put REALTIME_TURN_TOKEN_SECRET
+#
+# Token ID: ea3219ecd43a7f5eebb8da4064d0c531
+# API Token: 2cc033e78fe10b32a7496224b793f20c34f597512442ed6c7d332e15d84585b9
+
+# Custom domain routing for Vinet Hosting TURN server
+[[routes]]
+pattern = "turn-api.vinethosting.org/*"
+zone_name = "vinethosting.org"
+
+# Worker limits
+[limits]
+cpu_ms = 10000
