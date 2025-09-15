@@ -1,177 +1,354 @@
-# Cloudflare Speedtest
+# Vinet Internet Solutions Custom Speedtest
 
-[![NPM package][npm-img]][npm-url]
-[![Build Size][build-size-img]][build-size-url]
-[![NPM Downloads][npm-downloads-img]][npm-downloads-url]
+A complete custom-branded speedtest solution for **Vinet Internet Solutions** using Cloudflare Workers, based on the Cloudflare speedtest infrastructure. This implementation features Vinet's branding, South African localization, and professional design tailored for the South African internet market.
 
-`@cloudflare/speedtest` is a JavaScript module to measure the quality of a client’s Internet connection. It's the measurement engine that powers the Cloudflare speedtest measurement application available at [https://speed.cloudflare.com](https://speed.cloudflare.com).
+## 🇿🇦 Vinet Customizations
 
-The module performs test requests against the [Cloudflare](https://www.cloudflare.com/) edge network and relies on the [PerformanceResourceTiming browser api](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming) to extract timing results.
-The network connection is characterized by items such as download/upload bandwidth, latency and packet loss.
+### Brand Integration
+- **Vinet Internet Solutions** branding and logo integration
+- Professional blue and green color scheme matching ISP industry standards
+- South African market-focused messaging and localization
+- Contact information and company details pre-configured
 
-Please note that measurement results are collected by Cloudflare on completion for the purpose of calculating aggregated insights regarding Internet connection quality.
+### Visual Design
+- Modern gradient designs using Vinet's brand colors
+- Responsive logo placement with professional typography
+- Enhanced animations and visual feedback
+- Mobile-optimized layout for South African users
 
-**Warning:** The public TURN server for Packet Loss testing is deprecated and will be discontinued soon. Read the [packetLoss](#packetloss) section for more information.
+### User Experience
+- South African flag emoji in sharing features
+- Localized messaging and error handling
+- Connection quality descriptions tailored for local market
+- Vinet package upgrade suggestions for poor connections
 
-## Installation
+## 🏗️ Architecture
 
-Add this package to your `package.json` by running this in the root of your project's directory:
+The solution consists of three main components:
 
-```sh
-npm install @cloudflare/speedtest
+1. **Main Speedtest Worker** (`custom-speedtest-worker/`) - Handles download/upload endpoints
+2. **TURN Credentials Worker** (`custom-turn-worker/`) - Provides TURN server credentials for packet loss testing
+3. **Frontend Application** (`custom-speedtest-frontend/`) - Custom-branded web interface
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js >= 16
+- Cloudflare Workers account
+- Wrangler CLI installed (`npm install -g wrangler`)
+
+### 1. Deploy the Main Speedtest Worker
+
+```bash
+cd custom-speedtest-worker
+npm install
+wrangler login
+wrangler deploy
 ```
 
-## Simple Usage
+The worker will be available at `https://custom-speedtest.your-subdomain.workers.dev`
 
-```js
-import SpeedTest from '@cloudflare/speedtest';
+**For Vinet Production**: Configure a custom domain like `speedtest-api.vinet.co.za`
 
-new SpeedTest().onFinish = results => console.log(results.getSummary());
+**For Vinet Production**: Configure a custom domain like `speedtest-api.vinet.co.za`
+
+### 2. (Optional) Deploy the TURN Worker for Packet Loss Testing
+
+First, set up Cloudflare Realtime TURN server:
+
+1. Go to Cloudflare Dashboard → Realtime → TURN Server
+2. Create a new TURN server
+3. Note the Token ID and API Token
+
+Then deploy the worker:
+
+```bash
+cd custom-turn-worker
+npm install
+
+# Set secrets
+wrangler secret put REALTIME_TURN_TOKEN_ID
+wrangler secret put REALTIME_TURN_TOKEN_SECRET
+
+wrangler deploy
 ```
 
-## API reference
+### 3. Deploy the Frontend
 
-`SpeedTest` is a JavaScript Class and should be instantiated with the `new` keyword. It's not required to pass a config object, as all items have default values.
+The frontend is fully customized for Vinet Internet Solutions. Upload the contents of `custom-speedtest-frontend/` to:
+- Cloudflare Pages (recommended for Vinet)
+- Your web hosting provider
+- Or serve locally for testing
 
-### Instantiation
+**Demo Available**: Open `custom-speedtest-frontend/demo.html` to see the fully branded interface
 
-```js
-new SpeedTest({ configOptions })
+## ⚙️ Configuration
+
+### Main Speedtest Worker Configuration
+
+Edit `custom-speedtest-worker/wrangler.toml`:
+
+```toml
+[vars]
+CORS_ORIGINS = "https://speedtest.vinethosting.org"  # Your frontend domain
+MAX_FILE_SIZE = "268435456"  # 256MB max upload
+ENABLE_METRICS = "true"  # Enable metrics collection
+
+# Optional: KV binding for metrics storage
+[[kv_namespaces]]
+binding = "SPEEDTEST_KV"
+id = "your-kv-namespace-id"
 ```
 
-| Config option | Description | Default |
-| --- | --- | :--: |
-| **autoStart**: *boolean* | Whether to automatically start the measurements on instantiation. | `true` |
-| **downloadApiUrl**: *string* | The URL of the API for performing download GET requests. | `https://speed.cloudflare.com/__down` |
-| **uploadApiUrl**: *string* | The URL of the API for performing upload POST requests. | `https://speed.cloudflare.com/__up` |
-| **turnServerUri**: *string* | The URI of the TURN server used to measure packet loss. | `turn.cloudflare.com:3478` |
-| **turnServerCredsApiUrl**: *string* | A URI that returns TURN server credentials. Expects a JSON response with `username` and `credential` keys. | - | 
-| **turnServerUser**: *string* | The username for the TURN server credentials. | - |
-| **turnServerPass**: *string* | The password for the TURN server credentials. | - |
-| **measurements**: *array* | The sequence of measurements to perform by the speedtest engine. See [below](#measurement-config) for the specific syntax of this option. ||
-| **measureDownloadLoadedLatency**: *boolean* | Whether to perform additional latency measurements simultaneously with download requests, to measure loaded latency (during download). | `true` |
-| **measureUploadLoadedLatency**: *boolean* | Whether to perform additional latency measurements simultaneously with upload requests, to measure loaded latency (during upload). | `true` |
-| **loadedLatencyThrottle**: *number* | Time interval to wait in between loaded latency requests (in milliseconds). | 400 |
-| **bandwidthFinishRequestDuration**: *number* | The minimum duration (in milliseconds) to reach in download/upload measurement sets for halting further measurements with larger file sizes in the same direction. | 1000 |
-| **estimatedServerTime**: *number* | If the download/upload APIs do not return a server-timing response header containing the time spent in the server, this fixed value (in milliseconds) will be subtracted from all time-to-first-byte calculations. | 10 |
-| **latencyPercentile**: *number* | The percentile (between 0 and 1) used to calculate latency from a set of measurements. | 0.5 |
-| **bandwidthPercentile**: *number* | The percentile (between 0 and 1) used to calculate bandwidth from a set of measurements. | 0.9 |
-| **bandwidthMinRequestDuration**: *number* | The minimum duration (in milliseconds) of a request to consider a measurement good enough to use in the bandwidth calculation. | 10 |
-| **loadedRequestMinDuration**: *number* | The minimum duration (in milliseconds) of a request to consider it to be loading the connection. | 250 |
-| **loadedLatencyMaxPoints**: *number* | The maximum number of data points to keep for loaded latency measurements. When more than this amount are available, the latest ones are kept. | 20 |
+### Custom Domain Setup
 
-### Attributes
+For production, configure custom domains in your `wrangler.toml`:
 
-| Attribute | Description |
-| --- | --- |
-| **results**: *[Results](#results-object)* | Getter of the current [test results](#results-object) object. May yield incomplete values if the test is still running. |
-| **isRunning**: *boolean* | Getter of whether the test engine is currently running. |
-| **isFinished**: *boolean* | Getter of whether the test engine has finished all the measurements, and the results are considered final. |
-
-### Methods
-
-| Method | Description |
-| --- | --- |
-| **play()** | Starts or resumes the measurements. Does nothing if the engine is already running or is finished. |
-| **pause()** | Pauses the measurements. Does nothing if the engine is already paused or is finished. |
-| **restart()** | Clears the current results and restarts the measurements from the beginning. |
-
-### Notification Events
-
-| Event Method | Arguments | Description |
-| --- | --- | --- |
-| **onRunningChange** | running: *boolean* | Invoked whenever the test engine starts or stops. The current state is included as a function argument. |
-| **onResultsChange** | { type: *string* } | Invoked whenever any item changes in the results, usually indicating the completion of a measurement. The type of measurement that changed is included as an info attribute in the function argument. |
-| **onFinish** | results: *[Results](#results-object)* | Invoked whenever the test engine finishes all the measurements. The final [results object](#results-object) is included as a function argument. |
-| **onError** | error: *string* | Invoked whenever an error occurs during one of the measurements. The error details are included as a function argument. |
-
-### Measurement config
-
-The specific measurements to be performed by the test engine (and their sequence) can be customized using the `measurements` config option. This should be an array of objects, each with a `type` field, plus additional fields specific to that measurement type.
-
-The default set of measurements that is performed by the engine is:
-
-```js
-[
-  { type: 'latency', numPackets: 1 }, // initial latency estimation
-  { type: 'download', bytes: 1e5, count: 1, bypassMinDuration: true }, // initial download estimation
-  { type: 'latency', numPackets: 20 },
-  { type: 'download', bytes: 1e5, count: 9 },
-  { type: 'download', bytes: 1e6, count: 8 },
-  { type: 'upload', bytes: 1e5, count: 8 },
-  { type: 'packetLoss', numPackets: 1e3, responsesWaitTime: 3000 },
-  { type: 'upload', bytes: 1e6, count: 6 },
-  { type: 'download', bytes: 1e7, count: 6 },
-  { type: 'upload', bytes: 1e7, count: 4 },
-  { type: 'download', bytes: 2.5e7, count: 4 },
-  { type: 'upload', bytes: 2.5e7, count: 4 },
-  { type: 'download', bytes: 1e8, count: 3 },
-  { type: 'upload', bytes: 5e7, count: 3 },
-  { type: 'download', bytes: 2.5e8, count: 2 }
-]
+```toml
+[[routes]]
+pattern = "speedtest-api.vinethosting.org/*"
+zone_name = "vinethosting.org"
 ```
 
-Here are the fields available per measurement type:
+### Frontend Configuration
 
-#### latency
+1. Open the Vinet speedtest frontend in a browser
+2. Click "Advanced Settings"
+3. Configure:
+   - **Server URL**: Your main worker URL (e.g., `https://speedtest-api.vinethosting.org`)
+   - **TURN Server URL**: Your TURN worker URL (optional)
+   - Enable/disable packet loss testing and loaded latency
 
-| Field | Required | Description | Default |
-| --- | :--: | --- | :--: |
-| **numPackets**: *number* | yes | The number of latency GET requests to perform. These requests are performed against the download API with `bytes=0`, and then the round-trip time-to-first-byte timing between `requestStart` and `responseStart` is extracted. | - |
+Settings are automatically saved in browser localStorage.
 
-#### download / upload
+### Vinet Branding
 
-Each of these measurement sets are bound to a specific file size. The engine follows a ramp-up methodology per direction (download or upload). Whenever there are multiple measurement sets (with increasing file sizes) for a direction, the engine will keep on performing them until it reaches the condition specified by `bandwidthMinRequestDuration`, at which point further sets in the same direction are ignored.
+The speedtest is pre-configured with:
+- Vinet Internet Solutions logo and branding
+- Professional blue/green color scheme
+- South African contact information
+- Localized messaging and features
 
-| Field | Required | Description | Default |
-| --- | :--: | --- | :--: |
-| **bytes**: *number* | yes | The file size to request from the download API, or post to the upload API. The bandwidth (calculated as bits per second, or bps) for each request is calculated by dividing the `transferSize` (in bits) by the request duration (excluding the server processing time). | - |
-| **count**: *number* | yes | The number of requests to perform for this file size. | - |
-| **bypassMinDuration**: *boolean* | no | Whether the `bandwidthMinRequestDuration` check should be ignored, and the engine is instructed to proceed with the measurements of this direction in any case. | `false` |
+## 🚀 Quick Demo
 
-#### packetLoss
+To see the fully customized Vinet speedtest interface:
 
-Packet loss is measured by submitting a set of UDP packets to a WebRTC TURN server in a round-trip fashion, and determining how many packets do not arrive. The submission of these packets can be done in a batching method, in which there's a sleep time in between batches.
+```bash
+cd custom-speedtest-frontend
+python -m http.server 8080
+# Open http://localhost:8080/demo.html
+```
 
-**Note:** You must provide your own TURN server configuration if you'd like to get packet loss results from this engine.
+This shows the complete Vinet branding, colors, and South African customizations.
 
-Example code to enable this feature through a Cloudflare Worker, using a [Cloudflare Realtime TURN server](https://developers.cloudflare.com/realtime/turn/), is available at [example/turn-worker](example/turn-worker). Refer to the worker's [documentation](example/turn-worker/README.md) for setup and deployment instructions.
+## 🎨 Customization
 
-| Field | Required | Description | Default |
-| --- | :--: | --- | :--: |
-| **numPackets**: *number* | no | The total number of UDP packets to send. | 100 |
-| **responsesWaitTime**: *number* | no | The interval of time (in milliseconds) to wait after the latest packet reception before determining the measurement as complete, and all non-returned packets as lost. | 5000 |
-| **batchSize**: *number* | no | The number of packets in a batch. If this value is higher than `numPackets` there will be only one batch. | 10 |
-| **batchWaitTime**: *number* | no | How long to wait (in milliseconds) between batches. | 10 |
-| **connectionTimeout**: *number* | no | Timeout for the connection to the TURN server. | 5000 |
+### Branding
 
-### Results object
+Edit `custom-speedtest-frontend/index.html`:
 
-An instance object used to access the results of the speedtest measurements. The following methods are available on this object:
+```html
+<!-- Update logo and brand name -->
+<h1 class="brand-name">YourBrand</h1>
+<span class="brand-tagline">Speed Test</span>
 
-| Method | Description |
-| --- | --- |
-| **getSummary()** | Returns a high-level summary object with the computed results from the performed measurements. |
-| **getUnloadedLatency()** | Returns the reduced value of the connection latency while at idle. Requires at least one `latency` measurement. |
-| **getUnloadedJitter()** | Returns the connection jitter while at idle. Jitter is calculated as the average distance between consecutive latency measurements. Requires at least two `latency` measurements. |
-| **getUnloadedLatencyPoints()** | Returns an array with all the latencies measured while at idle. Includes one value per measurement in sequence. |
-| **getDownLoadedLatency()** | Returns the reduced value of the connection latency while loaded in the download direction. Requires `measureDownloadLoadedLatency` to be enabled. |
-| **getDownLoadedJitter()** | Returns the connection jitter while loaded in the download direction. Requires `measureDownloadLoadedLatency` to be enabled, and at least two loaded latency measurements. |
-| **getDownLoadedLatencyPoints()** | Returns an array with all the latencies measured while loaded in the download direction. Includes one value per loaded measurement in sequence. Requires `measureDownloadLoadedLatency` to be enabled. |
-| **getUpLoadedLatency()** | Returns the reduced value of the connection latency while loaded in the upload direction. Requires `measureUploadLoadedLatency` to be enabled. |
-| **getUpLoadedJitter()** | Returns the connection jitter while loaded in the upload direction. Requires `measureUploadLoadedLatency` to be enabled, and at least two loaded latency measurements. |
-| **getUpLoadedLatencyPoints()** | Returns an array with all the latencies measured while loaded in the upload direction. Includes one value per loaded measurement in sequence. Requires `measureUploadLoadedLatency` to be enabled. |
-| **getDownloadBandwidth()** | Returns the reduced value of the download bandwidth (in bps). Requires at least one `download` measurement, longer than the `bandwidthMinRequestDuration` threshold. |
-| **getDownloadBandwidthPoints()** | Returns an array with all the download measurement results. Each item will include the following fields: `{ bytes, bps, duration, ping, measTime, serverTime, transferSize }`. |
-| **getUploadBandwidth()** | Returns the reduced value of the upload bandwidth (in bps). Requires at least one `upload` measurement, longer than the `bandwidthMinRequestDuration` threshold. |
-| **getUploadBandwidthPoints()** | Returns an array with all the upload measurement results. Each item will include the following fields: `{ bytes, bps, duration, ping, measTime, serverTime, transferSize }`. |
-| **getPacketLoss()** | Returns the reduced value of the measured packet loss ratio (between 0 and 1). Requires a `packetLoss` measurement set. |
-| **getPacketLossDetails()** | Returns an object with the details of the packet loss measurement. Includes the following fields: `{ packetLoss, totalMessages, numMessagesSent, lostMessages }`. Requires a `packetLoss` measurement set. |
-| **getScores()** | Returns the computed [AIM scores](https://developers.cloudflare.com/fundamentals/speed/aim/) that categorize the quality of the network connection according to use cases such as streaming, gaming or real-time communications. This score is only available after the engine has finished performing all of the measurements. |
+<!-- Update contact information -->
+<a href="mailto:support@yourdomain.com" class="footer-link">support@yourdomain.com</a>
+```
 
-[npm-img]: https://img.shields.io/npm/v/@cloudflare/speedtest
-[npm-url]: https://npmjs.org/package/@cloudflare/speedtest
-[build-size-img]: https://img.shields.io/bundlephobia/minzip/@cloudflare/speedtest
-[build-size-url]: https://bundlephobia.com/result?p=@cloudflare/speedtest
-[npm-downloads-img]: https://img.shields.io/npm/dt/@cloudflare/speedtest
-[npm-downloads-url]: https://www.npmtrends.com/@cloudflare/speedtest
+### Styling
+
+Modify `custom-speedtest-frontend/styles.css`:
+
+```css
+/* Update brand colors */
+:root {
+  --primary-gradient: linear-gradient(135deg, #your-color-1 0%, #your-color-2 100%);
+  --accent-color: #your-accent-color;
+}
+```
+
+### Measurements Configuration
+
+Customize the test sequence by modifying the SpeedTest configuration in `script.js`:
+
+```javascript
+const speedTestConfig = {
+    autoStart: false,
+    downloadApiUrl: `${this.config.serverUrl}/__down`,
+    uploadApiUrl: `${this.config.serverUrl}/__up`,
+    measurements: [
+        { type: 'latency', numPackets: 20 },
+        { type: 'download', bytes: 1e6, count: 5 },
+        { type: 'upload', bytes: 1e6, count: 5 },
+        // Add custom measurements
+    ]
+};
+```
+
+### 🎯 Vinet-Specific Features:
+- **Brand Integration**: Vinet logo, colors, and professional styling
+- **Local Focus**: South African flag, local messaging, and market-specific content
+- **Contact Ready**: Pre-configured with Vinet support details
+- **Package Integration**: Smart suggestions for Vinet internet packages
+- **Professional Design**: ISP-grade interface with modern aesthetics
+
+### 🎨 Vinet Customizations Ready:
+
+✅ **Professional ISP branding** with Vinet logo and colors
+✅ **South African localization** with local messaging  
+✅ **Responsive design** optimized for all devices
+✅ **Contact integration** with Vinet support details
+✅ **Modern UI/UX** with enhanced animations
+✅ **Mobile optimization** for South African users
+
+## 📊 Features
+
+### Core Functionality
+- ✅ Download/Upload bandwidth testing
+- ✅ Latency and jitter measurements
+- ✅ Packet loss detection (with TURN server)
+- ✅ Real-time results display
+- ✅ Network quality scoring (AIM scores)
+
+### Advanced Features
+- ✅ Custom server endpoints
+- ✅ CORS configuration
+- ✅ Metrics collection (optional)
+- ✅ Progressive results display
+- ✅ Responsive design
+- ✅ Share results functionality
+- ✅ Error handling and retry logic
+
+### Customization Options
+- ✅ Custom branding and styling
+- ✅ Configurable test parameters
+- ✅ Custom domains
+- ✅ Flexible deployment options
+
+## 🔧 API Endpoints
+
+### Main Speedtest Worker
+
+- `GET /__down?bytes=N` - Download test endpoint
+- `POST /__up` - Upload test endpoint (send data in body)
+- `GET /health` - Health check
+
+### TURN Credentials Worker
+
+- `GET /turn-credentials` - Returns TURN server credentials (JSON)
+
+## 📈 Monitoring and Metrics
+
+If metrics are enabled, the worker can store test results in Cloudflare KV for analysis:
+
+```javascript
+// Metrics structure
+{
+  timestamp: 1234567890,
+  type: 'download' | 'upload',
+  bytes: 1048576,
+  serverTime: 45,
+  country: 'US',
+  colo: 'LAX',
+  userAgent: 'Mozilla/5.0...'
+}
+```
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Start main worker
+cd custom-speedtest-worker
+npm run dev
+
+# Start TURN worker (separate terminal)
+cd custom-turn-worker
+npm run dev
+
+# Serve frontend (separate terminal)
+cd custom-speedtest-frontend
+python -m http.server 8080  # or your preferred static server
+```
+
+### Environment Variables
+
+Create `.dev.vars` files for local development:
+
+**custom-speedtest-worker/.dev.vars**:
+```
+CORS_ORIGINS=http://localhost:8080
+ENABLE_METRICS=false
+```
+
+**custom-turn-worker/.dev.vars**:
+```
+REALTIME_TURN_TOKEN_ID=your-token-id
+REALTIME_TURN_TOKEN_SECRET=your-api-token
+REALTIME_TURN_ORIGINS=http://localhost:8080
+```
+
+## 🔒 Security Considerations
+
+1. **CORS Configuration**: Restrict `CORS_ORIGINS` to your domain in production
+2. **Rate Limiting**: Consider implementing rate limiting for public deployments
+3. **TURN Server**: Use authentication for TURN server access
+4. **File Size Limits**: Configure appropriate `MAX_FILE_SIZE` limits
+
+## 📋 Troubleshooting
+
+### Common Issues
+
+**"speedtest.vinet.co.za not configured"**
+- Configure the server URL to your deployed Vinet worker
+- Ensure the worker is deployed and accessible
+- Check Cloudflare DNS settings for custom domains
+
+**"CORS error"**
+- Check CORS_ORIGINS configuration in worker
+- Ensure frontend domain is whitelisted
+
+**"Packet loss test not working"**
+- Verify TURN worker is deployed
+- Check TURN server credentials
+- Ensure TURN URL is configured in frontend
+
+**"Tests failing with network errors"**
+- Check worker logs: `wrangler tail`
+- Verify DNS resolution for worker domains
+- Test endpoints directly with curl
+
+### Debug Mode
+
+Enable debug logging in the frontend by adding to localStorage:
+
+```javascript
+localStorage.setItem('speedtest-debug', 'true');
+```
+
+## 📄 License
+
+This project is based on the Cloudflare Speedtest engine. Please review the [original license](https://github.com/cloudflare/speedtest) for usage terms.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📞 Vinet Support
+
+For Vinet-specific deployment questions:
+- Email: support@vinet.co.za
+- Website: https://www.vinet.co.za
+- Location: Wellington, Western Cape, South Africa
+
+For technical issues with the speedtest infrastructure:
+- Check the troubleshooting section above
+- Review Cloudflare Workers documentation
+- Open an issue in the project repository

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinet Internet Solutions Speedtest - Clean Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Clean, minimal speedtest demo for Vinet Internet Solutions">
+    <style>
+        /* Demo-specific styles */
+        .demo-banner {
+            background: var(--primary-red);
+            color: var(--white);
+            text-align: center;
+            padding: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .demo-note {
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 16px;
+            margin: 20px 0;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-banner">
+        DEMO - Vinet Speedtest with Clean Red, White & Black Design
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <img src="https://static.vinet.co.za/Vinet%20Logo%20Png_Full%20Logo.png" alt="Vinet Internet Solutions" class="brand-logo">
+                    <div class="brand-text">
+                        <h1 class="brand-name">Vinet Internet Solutions</h1>
+                        <span class="brand-tagline">Speed Test</span>
+                    </div>
+                </div>
+                <nav class="nav">
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Demo Note -->
+        <div class="demo-note">
+            <strong>Clean & Professional Design:</strong> Minimal layout with red, white, and black color scheme. No unnecessary animations or gradients.
+        </div>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Speed Test Section -->
+            <section class="speedtest-section">
+                <div class="speedtest-container">
+                    <h2 class="speedtest-title">Internet Speed Test</h2>
+                    <p class="speedtest-description">
+                        Test your connection speed with accurate measurements of download/upload speeds, latency, and network quality.
+                    </p>
+                    
+                    <!-- Test Controls -->
+                    <div class="test-controls">
+                        <button class="start-button" onclick="showDemo()">
+                            <span class="button-text">Start Speed Test (Demo)</span>
+                        </button>
+                    </div>
+
+                    <!-- Demo Results (Static) -->
+                    <div class="live-results" style="display: grid; margin-top: 40px;">
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Download</div>
+                                <div class="result-value">87.5 Mbps</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Upload</div>
+                                <div class="result-value">23.8 Mbps</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Latency</div>
+                                <div class="result-value">18.3 ms</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Jitter</div>
+                                <div class="result-value">2.1 ms</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Score Demo -->
+                    <div class="quality-score" style="display: block;">
+                        <h4 class="score-title">Network Quality</h4>
+                        <div class="score-container">
+                            <div class="score-badge">Excellent</div>
+                            <div class="score-description">Perfect for streaming, gaming, and video calls</div>
+                        </div>
+                    </div>
+
+                    <div class="demo-note" style="margin-top: 30px;">
+                        <strong>Ready to deploy:</strong> Clean, professional interface with your red branding. Configure Cloudflare Workers to make it functional.
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 class="footer-title">About This Test</h4>
+                    <p class="footer-text">
+                        Professional speed testing powered by Vinet Internet Solutions. 
+                        Accurate network performance measurement for South African users.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Contact</h4>
+                    <p class="footer-text">
+                        <a href="mailto:support@vinet.co.za" class="footer-link">support@vinet.co.za</a><br>
+                        <a href="https://www.vinet.co.za" class="footer-link">vinet.co.za</a><br>
+                        Wellington, Western Cape
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Vinet Internet Solutions. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function showDemo() {
+            alert('Clean Design Demo\n\nThis shows your minimal red, white & black speedtest design.\n\nKey features:\n• Clean, professional layout\n• Red accent color\n• No unnecessary animations\n• Minimal design elements\n• Easy to read typography\n\nReady for production deployment!');
+        }
+    </script>
+</body>
+</html>

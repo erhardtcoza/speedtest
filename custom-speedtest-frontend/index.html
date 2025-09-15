@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinet Internet Solutions Speedtest</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Test your internet speed with Vinet Internet Solutions speedtest - Fast, reliable internet speed testing for South Africa">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <img src="https://static.vinet.co.za/Vinet%20Logo%20Png_Full%20Logo.png" alt="Vinet Internet Solutions" class="brand-logo">
+                    <div class="brand-text">
+                        <h1 class="brand-name">Vinet Internet Solutions</h1>
+                        <span class="brand-tagline">Speed Test</span>
+                    </div>
+                </div>
+                <nav class="nav">
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Speed Test Section -->
+            <section class="speedtest-section">
+                <div class="speedtest-container">
+                    <h2 class="speedtest-title">Internet Speed Test</h2>
+                    <p class="speedtest-description">
+                        Test your connection speed with accurate measurements of download/upload speeds, latency, and network quality.
+                    </p>
+                    
+                    <!-- Test Controls -->
+                    <div class="test-controls">
+                        <button id="startTest" class="start-button">
+                            <span class="button-text">Start Speed Test</span>
+                        </button>
+                        <button id="stopTest" class="stop-button" style="display: none;">
+                            <span class="button-text">Stop Test</span>
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div class="progress-container" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">Initializing test...</div>
+                    </div>
+
+                    <!-- Live Results -->
+                    <div class="live-results" style="display: none;">
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Download</div>
+                                <div class="result-value" id="downloadSpeed">-- Mbps</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Upload</div>
+                                <div class="result-value" id="uploadSpeed">-- Mbps</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Latency</div>
+                                <div class="result-value" id="latency">-- ms</div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-content">
+                                <div class="result-label">Jitter</div>
+                                <div class="result-value" id="jitter">-- ms</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Final Results -->
+                    <div class="final-results" style="display: none;">
+                        <h3 class="results-title">Test Complete!</h3>
+                        <div class="results-grid">
+                            <div class="result-item">
+                                <span class="result-metric">Download Speed</span>
+                                <span class="result-number" id="finalDownload">-- Mbps</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-metric">Upload Speed</span>
+                                <span class="result-number" id="finalUpload">-- Mbps</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-metric">Latency</span>
+                                <span class="result-number" id="finalLatency">-- ms</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-metric">Jitter</span>
+                                <span class="result-number" id="finalJitter">-- ms</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-metric">Packet Loss</span>
+                                <span class="result-number" id="packetLoss">-- %</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Network Quality Score -->
+                        <div class="quality-score" id="qualityScore" style="display: none;">
+                            <h4 class="score-title">Network Quality</h4>
+                            <div class="score-container">
+                                <div class="score-badge" id="scoreBadge">--</div>
+                                <div class="score-description" id="scoreDescription">Analyzing...</div>
+                            </div>
+                        </div>
+
+                        <!-- Share Results -->
+                        <div class="share-results">
+                            <button class="share-button" id="shareResults">Share Results</button>
+                            <button class="restart-button" id="restartTest">Test Again</button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-message" style="display: none;">
+                        <div class="error-text" id="errorText">Something went wrong. Please try again.</div>
+                        <button class="retry-button" id="retryTest">Retry Test</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration Panel -->
+            <section class="config-section">
+                <details class="config-details">
+                    <summary class="config-summary">Advanced Settings</summary>
+                    <div class="config-content">
+                        <div class="config-group">
+                            <label for="serverUrl" class="config-label">Server URL:</label>
+                            <input type="url" id="serverUrl" class="config-input" 
+                                   placeholder="https://your-worker.workers.dev" 
+                                   value="">
+                        </div>
+                        <div class="config-group">
+                            <label for="turnUrl" class="config-label">TURN Server URL (optional):</label>
+                            <input type="url" id="turnUrl" class="config-input" 
+                                   placeholder="https://turn-worker.workers.dev/turn-credentials" 
+                                   value="">
+                        </div>
+                        <div class="config-group">
+                            <label class="config-checkbox">
+                                <input type="checkbox" id="enablePacketLoss" checked>
+                                <span class="checkmark"></span>
+                                Enable Packet Loss Testing
+                            </label>
+                        </div>
+                        <div class="config-group">
+                            <label class="config-checkbox">
+                                <input type="checkbox" id="enableLoadedLatency" checked>
+                                <span class="checkmark"></span>
+                                Measure Loaded Latency
+                            </label>
+                        </div>
+                        <button class="save-config-button" id="saveConfig">Save Configuration</button>
+                    </div>
+                </details>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 class="footer-title">About This Test</h4>
+                    <p class="footer-text">
+                        Professional speed testing powered by Vinet Internet Solutions. 
+                        Accurate network performance measurement for South African users.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Privacy</h4>
+                    <p class="footer-text">
+                        Your test data is processed securely and not stored. 
+                        No personal information is collected.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Contact</h4>
+                    <p class="footer-text">
+                        <a href="mailto:support@vinet.co.za" class="footer-link">support@vinet.co.za</a><br>
+                        <a href="https://www.vinet.co.za" class="footer-link">vinet.co.za</a><br>
+                        Wellington, Western Cape
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Vinet Internet Solutions. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>

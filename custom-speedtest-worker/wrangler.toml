@@ -1,0 +1,23 @@
+name = "custom-speedtest"
+main = "src/index.ts"
+compatibility_date = "2023-10-30"
+
+# Environment variables
+[vars]
+CORS_ORIGINS = "https://speedtest.vinethosting.org"  # Your speedtest frontend domain
+MAX_FILE_SIZE = "268435456"  # 256MB
+ENABLE_METRICS = "false"
+
+# KV binding for metrics (optional)
+# [[kv_namespaces]]
+# binding = "SPEEDTEST_KV"
+# id = "4e48601e61944794a34e19758f4289fa"
+
+# Custom domain routing for Vinet Hosting
+[[routes]]
+pattern = "speedtest-api.vinethosting.org/*"
+zone_name = "vinethosting.org"
+
+# Worker limits
+[limits]
+cpu_ms = 50000
